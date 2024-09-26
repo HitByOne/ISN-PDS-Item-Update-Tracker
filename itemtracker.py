@@ -4,8 +4,9 @@ from datetime import datetime
 import re
 from pymongo import MongoClient
 
-# MongoDB Atlas connection string
+# Securely fetch the connection string
 mongo_conn_str = os.getenv("MONGO_CONN_STR")
+client = MongoClient(mongo_conn_str)
 db = client['isn_change_log']
 changes_collection = db.pdsitemchangelog
 

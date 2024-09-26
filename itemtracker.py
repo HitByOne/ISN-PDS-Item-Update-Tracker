@@ -3,10 +3,14 @@ import pandas as pd
 from datetime import datetime
 import re
 from pymongo import MongoClient
+import pymongo
 import os
 
 # Securely fetch the connection string
 mongo_conn_str = os.getenv("MONGO_CONN_STR")
+if not mongo_conn_str:
+    st.error("MongoDB connection string not set in environment variables.")
+    st.stop()
 client = MongoClient(mongo_conn_str)
 db = client['isn_change_log']
 changes_collection = db.pdsitemchangelog
@@ -22,13 +26,20 @@ def log_changes_to_db(item_numbers, changes, name, item_status, notes):
             **{change: 'Yes' if change in changes else 'No' for change in change_options},
             "notes": notes
         }
-        changes_collection.insert_one(document)
+        try:
+            changes_collection.insert_one(document)
+        except pymongo.errors.OperationFailure as e:
+            st.error(f"Failed to log changes: {str(e)}")
+            return False
+    return True
 
-def fetch_changes():
-    return pd.DataFrame(list(changes_collection.find({}, {'_id': 0})))
+def fetch_changes(limit=100):
+    return pd.DataFrame(list(changes_collection.find({}, {'_id': 0}).limit(limit)))
 
 # Streamlit app layout
 st.title("Item Change Tracker")
+filter_option = st.selectbox("Filter By", ["All", "Item Number", "Status"])
+
 cols1 = st.columns((1,1))
 names = ["McKenna Santucci", "Andrea Fritz", "Michael Harris", "Iris Kearney", "Tim Clarkson"]
 name = cols1[0].selectbox("Select Your Name", sorted(names))
@@ -52,15 +63,30 @@ notes = st.text_area("Enter Additional Notes", height=150)
 
 if st.button("Log Changes"):
     item_numbers = re.split(r'\s*[,\s]\s*', item_numbers_input.strip())
-    item_numbers = [i for i in item_numbers if i]
+    item_numbers = [item for item in item_numbers if item.isdigit() or item.isalnum()]  # Validate item numbers
     if item_numbers and changes and name:
-        try:
-            log_changes_to_db(item_numbers, changes, name, item_status, notes)
+        if log_changes_to_db(item_numbers, changes, name, item_status, notes):
             st.success("Changes have been logged successfully.")
-            df = fetch_changes()
-            st.subheader("Updated Change Log")
-            st.dataframe(df)
-        except Exception as e:
-            st.error(f"Error: {e}")
+        else:
+            st.error("Failed to log changes. Please check your input.")
     else:
         st.error("Please ensure all required fields are filled out.")
+
+if filter_option == "Item Number":
+    item_to_filter = st.text_input("Enter Item Number to Filter")
+    if st.button("Fetch By Item Number"):
+        df = fetch_changes()
+        df = df[df['item_number'] == item_to_filter]
+        st.subheader("Filtered Change Log by Item Number")
+        st.dataframe(df)
+elif filter_option == "Status":
+    status_to_filter = st.selectbox("Choose Status to Filter", item_status_options)
+    if st.button("Fetch By Status"):
+        df = fetch_changes()
+        df = df[df['item_status'] == status_to_filter]
+        st.subheader("Filtered Change Log by Status")
+        st.dataframe(df)
+else:
+    df = fetch_changes()
+    st.subheader("Latest Change Log")
+    st.dataframe(df)

@@ -5,7 +5,7 @@ import re
 from pymongo import MongoClient
 
 # MongoDB Atlas connection string
-client = MongoClient("mongodb+srv://test:test@cluster0.qdyup.mongodb.net/")
+mongo_conn_str = os.getenv("MONGO_CONN_STR")
 db = client['isn_change_log']
 changes_collection = db.pdsitemchangelog
 

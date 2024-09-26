@@ -38,7 +38,6 @@ def fetch_changes(limit=100):
 
 # Streamlit app layout
 st.title("Item Change Tracker")
-filter_option = st.selectbox("Filter By", ["All", "Item Number", "Status"])
 
 cols1 = st.columns((1,1))
 names = ["McKenna Santucci", "Andrea Fritz", "Michael Harris", "Iris Kearney", "Tim Clarkson"]
@@ -67,26 +66,10 @@ if st.button("Log Changes"):
     if item_numbers and changes and name:
         if log_changes_to_db(item_numbers, changes, name, item_status, notes):
             st.success("Changes have been logged successfully.")
+            df = fetch_changes()
+            st.subheader("Updated Change Log")
+            st.dataframe(df)
         else:
             st.error("Failed to log changes. Please check your input.")
     else:
         st.error("Please ensure all required fields are filled out.")
-
-if filter_option == "Item Number":
-    item_to_filter = st.text_input("Enter Item Number to Filter")
-    if st.button("Fetch By Item Number"):
-        df = fetch_changes()
-        df = df[df['item_number'] == item_to_filter]
-        st.subheader("Filtered Change Log by Item Number")
-        st.dataframe(df)
-elif filter_option == "Status":
-    status_to_filter = st.selectbox("Choose Status to Filter", item_status_options)
-    if st.button("Fetch By Status"):
-        df = fetch_changes()
-        df = df[df['item_status'] == status_to_filter]
-        st.subheader("Filtered Change Log by Status")
-        st.dataframe(df)
-else:
-    df = fetch_changes()
-    st.subheader("Latest Change Log")
-    st.dataframe(df)

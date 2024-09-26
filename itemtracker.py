@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import re
 from pymongo import MongoClient
+import os
 
 # Securely fetch the connection string
 mongo_conn_str = os.getenv("MONGO_CONN_STR")

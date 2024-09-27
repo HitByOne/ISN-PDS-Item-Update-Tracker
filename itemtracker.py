@@ -44,7 +44,7 @@ names = ["McKenna Santucci", "Andrea Fritz", "Michael Harris", "Iris Kearney", "
 name = cols1[0].selectbox("Select Your Name", sorted(names))
 item_numbers_input = cols1[1].text_area("Enter Item Numbers (space, comma, or newline separated)", height=300)
 
-item_status_options = ["Active", "Obsolete", "Reactivate", "Supersede", "New Item", "Promotional Item"]
+item_status_options = ["Active", "Obsolete", "Reactivate", "Supersede", "New Item", "Promotional Item", "Quick Sale"]
 item_status = st.selectbox("Select Item Status", item_status_options)
 
 change_options = [

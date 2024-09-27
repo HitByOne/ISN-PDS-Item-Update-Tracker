@@ -54,15 +54,17 @@ change_options = [
     "Cost", "Country of Origin", "Harmonized Tariff Code (HTS)", "Hazardous Material Code",
     "LTL", "Cartonize", "Guaranteed Return", "Warranty Policy", "Is Repairable",
     "Prop 65", "DOT Regulation", "Lithium", "UN Number", "Price Group", "Inventory Group",
-    "Inventory Category (Prefix)", "Drop Ship Only", "Stocking", "Supplier Review","Image", "No Updates"
+    "Inventory Category (Prefix)", "Drop Ship Only", "Stocking", "Supplier Review", "Image", "No Updates"
 ]
 changes = st.multiselect("Item Updates", change_options)
 
 notes = st.text_area("Enter Additional Notes", height=150)
 
 if st.button("Log Changes"):
-    item_numbers = re.split(r'\s*[,\s]\s*', item_numbers_input.strip())
-    item_numbers = [item for item in item_numbers if item.isdigit() or item.isalnum()]  # Validate item numbers
+    # Updated regex to split based on commas, spaces, or newlines and include more complex item number patterns
+    item_numbers = re.split(r'\s*[,;\s]\s*', item_numbers_input.strip())
+    # Updated validation to accept alphanumeric characters and those starting with specific prefixes like 'MLW'
+    item_numbers = [item.strip() for item in item_numbers if re.match(r'^MLW\d+|\d+|[A-Za-z0-9]+$', item)]
     if item_numbers and changes and name:
         if log_changes_to_db(item_numbers, changes, name, item_status, notes):
             st.success("Changes have been logged successfully.")

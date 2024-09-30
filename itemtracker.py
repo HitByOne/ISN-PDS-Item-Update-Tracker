@@ -68,8 +68,8 @@ if st.button("Log Changes"):
     item_numbers_input = item_numbers_input.strip()
     item_numbers = re.split(r'\s*[,;\s]\s*', item_numbers_input)
     
-    # Updated regex pattern to include optional hyphen and digits
-    item_numbers = [item.strip() for item in item_numbers if re.match(r'^(MLW\d+|HEL\d+(-\d+)?|\d+(-\d+)?)$', item)]
+    # Updated regex pattern to include ARM, HEL, and MLW item numbers
+    item_numbers = [item.strip() for item in item_numbers if re.match(r'^(MLW\d+|HEL\d+(-\d+)?|ARM\d+(-\d+)?|\d+(-\d+)?)$', item)]
 
     # Input validation
     if not item_numbers:

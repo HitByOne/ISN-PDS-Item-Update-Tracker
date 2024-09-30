@@ -66,14 +66,15 @@ notes = st.text_area("Enter Additional Notes", height=150)
 
 if st.button("Log Changes"):
     item_numbers_input = item_numbers_input.strip()
+    # Directly use the input without regex validation
     item_numbers = re.split(r'\s*[,;\s]\s*', item_numbers_input)
-    
-    # Updated regex pattern to include ARM, HEL, and MLW item numbers
-    item_numbers = [item.strip() for item in item_numbers if re.match(r'^(MLW\d+|HEL\d+(-\d+)?|ARM\d+(-\d+)?|\d+(-\d+)?)$', item)]
+
+    # Strip any whitespace from each item
+    item_numbers = [item.strip() for item in item_numbers if item.strip()]
 
     # Input validation
     if not item_numbers:
-        st.error("No valid item numbers were provided. Please check your input format.")
+        st.error("No item numbers were provided. Please enter at least one item number.")
     elif not changes:
         st.error("Please select at least one change option.")
     elif not name:

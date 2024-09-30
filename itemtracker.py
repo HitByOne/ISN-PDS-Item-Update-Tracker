@@ -67,6 +67,7 @@ notes = st.text_area("Enter Additional Notes", height=150)
 if st.button("Log Changes"):
     item_numbers_input = item_numbers_input.strip()
     item_numbers = re.split(r'\s*[,;\s]\s*', item_numbers_input)
+    
     # Updated regex pattern to include optional hyphen and digits
     item_numbers = [item.strip() for item in item_numbers if re.match(r'^(MLW\d+|HEL\d+(-\d+)?|\d+(-\d+)?)$', item)]
 
@@ -80,6 +81,7 @@ if st.button("Log Changes"):
     elif not requestor:
         st.error("Please enter the Requestor's name.")
     else:
+        # Log the changes to the database
         if log_changes_to_db(item_numbers, changes, name, item_status, notes):
             st.success("Changes have been logged successfully.")
             df = fetch_changes()
@@ -87,3 +89,4 @@ if st.button("Log Changes"):
             st.dataframe(df)
         else:
             st.error("Failed to log changes. Please check your input.")
+

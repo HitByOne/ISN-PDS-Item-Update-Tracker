@@ -39,10 +39,14 @@ def fetch_changes(limit=100):
 # Streamlit app layout
 st.title("Item Change Tracker")
 
-cols1 = st.columns((1,1))
+cols1 = st.columns((1, 1))
 names = ["McKenna Santucci", "Andrea Fritz", "Michael Harris", "Iris Kearney", "Tim Clarkson"]
 name = cols1[0].selectbox("Select Your Name", sorted(names))
-item_numbers_input = cols1[1].text_area("Enter Item Numbers (space, comma, or newline separated)", height=300)
+
+# New Requestor input
+requestor = cols1[1].text_input("Requestor")
+
+item_numbers_input = st.text_area("Enter Item Numbers (space, comma, or newline separated)", height=300)
 
 item_status_options = ["Active", "Obsolete", "Reactivate", "Supersede", "New Item", "Promotional Item", "Quick Sale"]
 item_status = st.selectbox("Select Item Status", item_status_options)
@@ -61,11 +65,20 @@ changes = st.multiselect("Item Updates", change_options)
 notes = st.text_area("Enter Additional Notes", height=150)
 
 if st.button("Log Changes"):
-    # Updated regex to split based on commas, spaces, or newlines and include more complex item number patterns
     item_numbers = re.split(r'\s*[,;\s]\s*', item_numbers_input.strip())
-    # Updated validation to accept alphanumeric characters and those starting with specific prefixes like 'MLW'
-    item_numbers = [item.strip() for item in item_numbers if re.match(r'^MLW\d+|\d+|[A-Za-z0-9]+$', item)]
-    if item_numbers and changes and name:
+    # Updated regex to include 'HEL' prefix
+    item_numbers = [item.strip() for item in item_numbers if re.match(r'^(MLW\d+|HEL\d+|\d+|[A-Za-z0-9]+)$', item)]
+    
+    # Input validation
+    if not item_numbers:
+        st.error("No valid item numbers were provided. Please check your input format.")
+    elif not changes:
+        st.error("Please select at least one change option.")
+    elif not name:
+        st.error("Please select your name.")
+    elif not requestor:
+        st.error("Please enter the Requestor's name.")
+    else:
         if log_changes_to_db(item_numbers, changes, name, item_status, notes):
             st.success("Changes have been logged successfully.")
             df = fetch_changes()
@@ -73,5 +86,3 @@ if st.button("Log Changes"):
             st.dataframe(df)
         else:
             st.error("Failed to log changes. Please check your input.")
-    else:
-        st.error("Please ensure all required fields are filled out.")

@@ -65,10 +65,11 @@ changes = st.multiselect("Item Updates", change_options)
 notes = st.text_area("Enter Additional Notes", height=150)
 
 if st.button("Log Changes"):
-    item_numbers = re.split(r'\s*[,;\s]\s*', item_numbers_input.strip())
-    # Updated regex to include 'HEL' prefix
-    item_numbers = [item.strip() for item in item_numbers if re.match(r'^(MLW\d+|HEL\d+|\d+|[A-Za-z0-9]+)$', item)]
-    
+    item_numbers_input = item_numbers_input.strip()
+    item_numbers = re.split(r'\s*[,;\s]\s*', item_numbers_input)
+    # Updated regex pattern to include optional hyphen and digits
+    item_numbers = [item.strip() for item in item_numbers if re.match(r'^(MLW\d+|HEL\d+(-\d+)?|\d+(-\d+)?)$', item)]
+
     # Input validation
     if not item_numbers:
         st.error("No valid item numbers were provided. Please check your input format.")
